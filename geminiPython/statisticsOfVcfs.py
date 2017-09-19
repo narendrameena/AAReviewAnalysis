@@ -23,7 +23,7 @@ import queryAllVcf as qav
 DBFolders="/Users/naru/Documents/BISR/AAReviewPaper/dataFromIonTorrent/"
 
 
-#getting variatn statistics 
+#getting variant statistics 
 def getVarState(fileList):
     #printing all results a single graph 
     listOfNumberOfVariant = []

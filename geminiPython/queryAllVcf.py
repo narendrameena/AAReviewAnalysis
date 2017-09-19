@@ -45,12 +45,12 @@ def getVarLocation(results):
         #make sure which db 
         print("opened : " + db)
         #de novov variants, not in dbsnp, esp and 1kg 
-        variantNotInDB = conn.execute('''select chrom, start, end   from variants where is_lof=1 AND in_esp=0 AND in_dbsnp=0 AND in_1kg=0''').fetchall()
+        variantNotInDB = conn.execute('''select chrom, start, end   from variants where is_lof=1 AND in_esp=1 AND in_dbsnp=1 AND in_1kg=1''').fetchall()
         chrom = list(map(itemgetter(0), variantNotInDB)) # first column 
         
         #print("chrom : " + str(len(chrom)) +  "\n")
         chrom = [x.encode("utf-8") for x in chrom]
-        print(chrom)
+        #print(chrom)
         start= list(map(itemgetter(1), variantNotInDB)) # second column 
         #print("start : " + str(len(start)) +  "\n")
         #print(start)
@@ -85,9 +85,15 @@ def makingDataFrame(allVariants, results):
             #print("opened : " + db)
             #de novov variants, not in dbsnp, esp and 1kg 
             #print(db)
-            variant = conn.execute('''select aaf, gene from variants WHERE is_lof=1 AND chrom like "%'''+index[0] +'''%" AND start =''' +str(index[1])+''' AND end = ''' +str(index[2])).fetchall()
+            #print(db.split("/"))
+            #print(db.split("/")[7])
+            variant = conn.execute('''select gene from variants WHERE is_lof=1 AND chrom like "%'''+index[0] +'''%" AND start =''' +str(index[1])+''' AND end = ''' +str(index[2])).fetchall()
             encodeVar = list(map(itemgetter(0), variant))
-            #encodeVar = [x.encode("utf-8") for x in encodeVar] #uncomment if output is character 
+            encodeVar = [x.encode("utf-8") for x in encodeVar] #uncomment if output is character 
+            if len(encodeVar)== 0: # cheking if list is empty or not 
+                encodeVar=""
+            else:
+                encodeVar =encodeVar[0]
             output.set_value(index,db,encodeVar)
             #print(list(map(itemgetter(1), variantNotInDB)))
             conn.close()
@@ -104,8 +110,10 @@ if __name__ == "__main__":
     results = fileList(DBFolders)
     allVariants = getVarLocation(results)   
     #print(output)
+    print([i.split("/")[7] for i in results])
     outputFileName= "data/output.csv"
-    csvOut = makingDataFrame(allVariants, results)
+    csvOut = makingDataFrame(allVariants, results  )
+    csvOut.columns = [i.split("/")[7] for i in results]
     csvOut.to_csv(outputFileName , sep=',')
     print("successful")
 else:
